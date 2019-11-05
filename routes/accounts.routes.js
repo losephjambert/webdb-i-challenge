@@ -75,7 +75,15 @@ router.put('/:id', async (req, res) => {
 });
 
 router.delete('/:id', async (req, res) => {
-  res.status(200).json({ message: `${req.method}: Hello from the accounts resource 👋` });
+  const id = req.params.id;
+  try {
+    const count = await knex('accounts')
+      .where({ id })
+      .del();
+    res.status(201).json(count);
+  } catch (error) {
+    res.status(500).json({ message: `Error deleting account from database` });
+  }
 });
 
 module.exports = router;
