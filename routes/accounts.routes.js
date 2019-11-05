@@ -49,7 +49,29 @@ router.post('/', async (req, res) => {
 });
 
 router.put('/:id', async (req, res) => {
-  res.status(200).json({ message: `${req.method}: Hello from the accounts resource 👋` });
+  const id = req.params.id;
+  const changes = req.body;
+  try {
+    const accountExists = await knex
+      .select('*')
+      .from('accounts')
+      .where('id', '=', id)
+      .first();
+    if (accountExists) {
+      try {
+        const update = await knex('accounts')
+          .where({ id })
+          .update(changes);
+        res.status(201).json(update);
+      } catch (error) {
+        res.status(500).json({ message: `Error updating account.` });
+      }
+    } else {
+      res.status(400).json({ message: `No account with id ${id} exists` });
+    }
+  } catch (error) {
+    res.status(500).json({ message: `Error validating account.` });
+  }
 });
 
 router.delete('/:id', async (req, res) => {
